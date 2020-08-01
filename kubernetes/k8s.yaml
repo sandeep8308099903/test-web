@@ -1,50 +1,41 @@
-apiVersion: apps/v1
-kind: Deployment
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
 metadata:
+  name: "test-app"
+  namespace: "default"
   labels:
-    app: sandeep-app
-  name: sandeep-app
-  namespace: default
+    app: "test-app"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sandeep-app
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: "test-app"
   template:
     metadata:
       labels:
-        app: sandeep-app
+        app: "test-app"
     spec:
       containers:
-        - image: >-
-            gcr.io/my-test-project-02-284307/github.com/sandeep8308099903/test-web
-          imagePullPolicy: IfNotPresent
-          name: sandeep-app
+      - name: "test-web-1"
+        image: "gcr.io/my-test-project-02-284307/github.com/sandeep8308099903/test-web:$SHORT_SHA"
 ---
-apiVersion: v1
-kind: Service
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
 metadata:
-  finalizers:
-    - service.kubernetes.io/load-balancer-cleanup
+  name: "test-app-hpa-fygc"
+  namespace: "default"
   labels:
-    app: sandeep-app
-  name: sandeep-app-service
-  namespace: default
+    app: "test-app"
 spec:
-  clusterIP: 10.40.15.177
-  externalTrafficPolicy: Cluster
-  ports:
-    - nodePort: 32201
-      port: 80
-      protocol: TCP
-      targetPort: 80
-  selector:
-    app: sandeep-app
-  sessionAffinity: None
-  type: LoadBalancer
-
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "test-app"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: "Resource"
+    resource:
+      name: "cpu"
+      targetAverageUtilization: 80
