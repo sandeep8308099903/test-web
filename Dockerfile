@@ -10,4 +10,4 @@ RUN echo "<h1>The Web Server is Running</h1>" > /var/www/html/index.html
 EXPOSE 80 443
 
 # Start the service
-CMD mkdir /run/httpd ; /usr/sbin/httpd -D FOREGROUND
+#CMD mkdir /run/httpd ; /usr/sbin/httpd -D FOREGROUND
